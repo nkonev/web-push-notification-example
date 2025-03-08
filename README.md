@@ -2,17 +2,10 @@
 
 ## Run MongoDB
 
-To pull the image and run the container for the first time, run the following commands:
+You can start MongoDB container like this:
 
 ```
-docker pull mongo
-docker run -d -p 27017-27019:27017-27019 --name mongo mongo:latest
-```
-
-After that, you can start the already existing container like this:
-
-```
-docker container start mongo
+docker compose up -d
 ```
 
 You can enter the docker container's bash terminal with the following command. Run `mongo` in there to inspect the database:
@@ -21,6 +14,21 @@ You can enter the docker container's bash terminal with the following command. R
 docker exec -it mongo bash
 ```
 
+Open db
+```
+docker exec -it mongo mongosh
+use web-push-notifications
+db.subscriptions.find().pretty();
+```
+
+## Generate VAPID keys
+```
+npm install
+npx web-push generate-vapid-keys
+```
+
+Then set them into `app/config/webpush.ts` and `client/index.js`
+
 ## Run the app
 
 After having a running mongo instance, you can execute the following command to start the web application
@@ -28,4 +36,7 @@ After having a running mongo instance, you can execute the following command to 
 ```
 npm start
 ```
+
+## Links
+* https://felixgerschau.com/web-push-notifications-tutorial/
 

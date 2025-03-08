@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import * as subscriptionRepository from '../repositories/subscriptionRepository';
-import webpush, { SendResult } from 'web-push';
+import webpush, { SendResult, WebPushError } from 'web-push';
 
 export const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -48,14 +48,24 @@ export const broadcast = async (
 
     const subscriptions = await subscriptionRepository.getAll();
 
-    const notifications: Promise<SendResult>[] = [];
-    subscriptions.forEach((subscription) => {
-      notifications.push(webpush.sendNotification(subscription, JSON.stringify(notification)));
+    const notifications: Promise<SendResult | void>[] = [];
+    subscriptions.forEach(async (subscription) => {
+        notifications.push(webpush.sendNotification(subscription, JSON.stringify(notification)).catch((e: WebPushError) => {
+          if (e.statusCode == 410) {
+            console.error("Deleting stale subscription", subscription.endpoint)
+            return subscriptionRepository
+                .deleteByEndpoint(subscription.endpoint)
+                .then(_ => {});
+          } else {
+            return Promise.reject(e)
+          }
+        }));
     });
 
     await Promise.all(notifications);
     res.sendStatus(200);
   } catch (e) {
+    console.error("Got error", e)
     next(e);
   }
 };

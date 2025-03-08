@@ -1,2 +1,8 @@
+!.gitignore
+.project
+.idea
+*.iml
 node_modules
-dist
+.vscode/
+*.log
+dist/

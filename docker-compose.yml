@@ -1,0 +1,19 @@
+services:
+
+  postgresql:
+    image: mongo:8.0.5
+    restart: unless-stopped
+    container_name: mongo
+    hostname: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db:z
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "1"
+
+volumes:
+  mongo_data:
